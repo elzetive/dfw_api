@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class TransaksiApiController extends Controller
 {
+    // MENAMPILKAN SEMUA DATA (Untuk Riwayat Hari Ini)
     public function index()
     {
         try {
@@ -41,20 +43,114 @@ class TransaksiApiController extends Controller
         }
     }
 
+    // MENAMPILKAN HANYA YANG BERSTATUS AKTIF
+    public function getTransaksiAktif()
+    {
+        try {
+            $transaksi = DB::table('transaksis')
+                ->join('units', 'transaksis.unit_id', '=', 'units.id')
+                ->join('pelanggans', 'transaksis.pelanggan_id', '=', 'pelanggans.id')
+                ->select(
+                    'transaksis.id',
+                    'transaksis.unit_id',
+                    'pelanggans.nama_pelanggan',
+                    'units.nama_unit',
+                    'transaksis.tipe_penyewaan',
+                    'transaksis.durasi_jam',
+                    'transaksis.total_harga',
+                    'transaksis.status'
+                )
+                ->where('transaksis.status', 'Aktif')
+                ->orderBy('transaksis.id', 'desc')
+                ->get();
+
+            // Disamakan strukturnya agar memiliki key 'message' dan 'data'
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil mengambil data transaksi aktif',
+                'data' => $transaksi
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil data aktif',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // UPDATE STATUS TRANSAKSI & KEMBALIKAN STATUS UNIT PLAY
+    public function selesaikanTransaksi(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'transaksi_id' => 'required',
+            'unit_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Parameter tidak lengkap',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            DB::table('transaksis')
+                ->where('id', $request->transaksi_id)
+                ->update([
+                    'status' => 'Selesai',
+                    'updated_at' => now()
+                ]);
+
+            DB::table('units')
+                ->where('id', $request->unit_id)
+                ->update([
+                    'status' => 'Tersedia',
+                    'updated_at' => now()
+                ]);
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaksi Selesai'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyelesaikan transaksi',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // MEMBUAT TRANSAKSI BARU
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'unit_id'        => 'required|integer|exists:units,id',
             'pelanggan_id'   => 'required|integer|exists:pelanggans,id',
-            'tipe_penyewaan' => 'required|in:Main di Tempat,Dibawa Pulang',
+            'tipe_penyewaan' => 'required',
             'durasi_jam'     => 'required|integer',
             'total_harga'    => 'required|integer',
         ]);
 
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
         DB::beginTransaction();
         try {
             $unit = DB::table('units')->where('id', $request->unit_id)->first();
-            if ($unit->status !== 'Tersedia') {
+
+            if (!$unit || $unit->status !== 'Tersedia') {
+                DB::rollBack(); // Jangan lupa rollback jika kondisi tidak terpenuhi
                 return response()->json([
                     'success' => false,
                     'message' => 'Unit play ini sedang dipakai atau dalam perawatan!'
@@ -73,7 +169,8 @@ class TransaksiApiController extends Controller
             ]);
 
             DB::table('units')->where('id', $request->unit_id)->update([
-                'status' => 'Tidak Tersedia'
+                'status' => 'Tidak Tersedia',
+                'updated_at' => now()
             ]);
 
             DB::commit();

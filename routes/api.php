@@ -8,7 +8,13 @@ use App\Http\Controllers\Api\KonsolApiController;
 use App\Http\Controllers\Api\TvApiController;
 use App\Http\Controllers\Api\UnitApiController;
 use App\Http\Controllers\Api\TransaksiApiController;
+use App\Http\Controllers\Api\AuthController;
 
+// ==================== AUTHENTICATION ====================
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']); // <--- INI SUDAH DITAMBAHKAN
+
+// ==================== DASHBOARD & DATA MASTER ====================
 Route::get('/dashboard-data', [DashboardApiController::class, 'getDashboardData']);
 
 Route::get('/pelanggan', [PelangganApiController::class, 'index']);
@@ -23,5 +29,9 @@ Route::post('/tv', [TvApiController::class, 'store']);
 Route::get('/unit', [UnitApiController::class, 'index']);
 Route::post('/unit', [UnitApiController::class, 'store']);
 
+// ==================== TRANSAKSI & OPERASIONAL ====================
 Route::get('/transaksi', [TransaksiApiController::class, 'index']);
 Route::post('/transaksi', [TransaksiApiController::class, 'store']);
+
+Route::get('/transaksi/aktif', [TransaksiApiController::class, 'getTransaksiAktif']);
+Route::post('/transaksi/selesai', [TransaksiApiController::class, 'selesaikanTransaksi']);

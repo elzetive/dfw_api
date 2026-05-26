@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class KonsolApiController extends Controller
 {
@@ -28,11 +29,18 @@ class KonsolApiController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'id' => 'required|string|unique:konsols,id',
             'nama_unit' => 'required|string|max:255',
-            'tipe' => 'required|in:PS4,PS5,Xbox One,Nintendo Switch',
+            'tipe' => 'required|in:PS3,PS4,PS5',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
 
         try {
             DB::table('konsols')->insert([
