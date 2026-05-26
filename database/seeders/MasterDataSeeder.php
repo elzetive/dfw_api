@@ -56,7 +56,6 @@ class MasterDataSeeder extends Seeder
                 'id' => 1,
                 'nama_unit' => 'Unit 1 - PS 5 Regular',
                 'konsol_id' => 'KSL-02',
-                'tv_id' => 'TV Generic 02',
                 'tv_id' => 'TV-02',
                 'status' => 'Tersedia',
                 'created_at' => now(),
