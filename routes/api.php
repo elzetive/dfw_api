@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\TvApiController;
 use App\Http\Controllers\Api\UnitApiController;
 use App\Http\Controllers\Api\TransaksiApiController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\LaporanApiController;
+use App\Http\Controllers\Api\PengaturanApiController;
 
 // ==================== AUTHENTICATION ====================
 Route::post('/register', [AuthController::class, 'register']);
@@ -19,6 +21,8 @@ Route::get('/dashboard-data', [DashboardApiController::class, 'getDashboardData'
 
 Route::get('/pelanggan', [PelangganApiController::class, 'index']);
 Route::post('/pelanggan', [PelangganApiController::class, 'store']);
+Route::delete('/pelanggan/{id}', [PelangganApiController::class, 'destroy']);
+Route::put('/pelanggan/{id}', [PelangganApiController::class, 'update']);
 
 Route::get('/konsol', [KonsolApiController::class, 'index']);
 Route::post('/konsol', [KonsolApiController::class, 'store']);
@@ -35,3 +39,11 @@ Route::post('/transaksi', [TransaksiApiController::class, 'store']);
 
 Route::get('/transaksi/aktif', [TransaksiApiController::class, 'getTransaksiAktif']);
 Route::post('/transaksi/selesai', [TransaksiApiController::class, 'selesaikanTransaksi']);
+
+// ==================== LAPORAN ====================
+Route::get('/laporan', [LaporanApiController::class, 'index']);
+Route::get('/laporan/{tanggal}', [LaporanApiController::class, 'detail']);
+
+// ==================== PENGATURAN ====================
+Route::get('/pengaturan', [PengaturanApiController::class, 'getPengaturan']);
+Route::post('/pengaturan', [PengaturanApiController::class, 'updatePengaturan']);
