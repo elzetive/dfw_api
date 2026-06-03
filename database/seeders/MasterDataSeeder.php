@@ -9,9 +9,26 @@ class MasterDataSeeder extends Seeder
 {
     public function run(): void
     {
+        // Membersihkan data lama agar id string tidak bentrok (Truncate Cascading)
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('units')->truncate();
+        DB::table('konsols')->truncate();
+        DB::table('tvs')->truncate();
+        DB::table('pelanggans')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
         DB::table('konsols')->insert([
             [
                 'id' => 'KSL-01',
+                'nama_unit' => 'PS3 Super Slim 01',
+                'tipe' => 'PS3', // <--- Ditambahkan data default PS3
+                'kondisi' => 'Baik',
+                'status' => 'Tersedia',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id' => 'KSL-02',
                 'nama_unit' => 'PS4 Slim Pro 01',
                 'tipe' => 'PS4',
                 'kondisi' => 'Baik',
@@ -20,7 +37,7 @@ class MasterDataSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 'KSL-02',
+                'id' => 'KSL-03',
                 'nama_unit' => 'PS5 Digital Edition 01',
                 'tipe' => 'PS5',
                 'kondisi' => 'Baik',
@@ -55,7 +72,7 @@ class MasterDataSeeder extends Seeder
             [
                 'id' => 1,
                 'nama_unit' => 'Unit 1 - PS 5 Regular',
-                'konsol_id' => 'KSL-02',
+                'konsol_id' => 'KSL-03',
                 'tv_id' => 'TV-02',
                 'status' => 'Tersedia',
                 'created_at' => now(),
@@ -63,8 +80,8 @@ class MasterDataSeeder extends Seeder
             ],
             [
                 'id' => 2,
-                'nama_unit' => 'Unit 4 - PS 4 Hemat',
-                'konsol_id' => 'KSL-01',
+                'nama_unit' => 'Unit 2 - PS 4 Hemat',
+                'konsol_id' => 'KSL-02',
                 'tv_id' => 'TV-01',
                 'status' => 'Tersedia',
                 'created_at' => now(),

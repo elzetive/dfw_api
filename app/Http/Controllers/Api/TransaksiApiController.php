@@ -64,7 +64,6 @@ class TransaksiApiController extends Controller
                 ->orderBy('transaksis.id', 'desc')
                 ->get();
 
-            // Disamakan strukturnya agar memiliki key 'message' dan 'data'
             return response()->json([
                 'success' => true,
                 'message' => 'Berhasil mengambil data transaksi aktif',
@@ -130,17 +129,17 @@ class TransaksiApiController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'unit_id'        => 'required|integer|exists:units,id',
-            'pelanggan_id'   => 'required|integer|exists:pelanggans,id',
+            'unit_id'        => 'required|exists:units,id',
+            'pelanggan_id'   => 'required|exists:pelanggans,id',
             'tipe_penyewaan' => 'required',
-            'durasi_jam'     => 'required|integer',
-            'total_harga'    => 'required|integer',
+            'durasi_jam'     => 'required',
+            'total_harga'    => 'required',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validasi gagal',
+                'message' => 'Validasi gagal, pastikan relasi unit dan pelanggan cocok.',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -150,13 +149,14 @@ class TransaksiApiController extends Controller
             $unit = DB::table('units')->where('id', $request->unit_id)->first();
 
             if (!$unit || $unit->status !== 'Tersedia') {
-                DB::rollBack(); // Jangan lupa rollback jika kondisi tidak terpenuhi
+                DB::rollBack();
                 return response()->json([
                     'success' => false,
                     'message' => 'Unit play ini sedang dipakai atau dalam perawatan!'
                 ], 400);
             }
 
+            // Tambah riwayat transaksi sewa aktif
             DB::table('transaksis')->insert([
                 'unit_id'        => $request->unit_id,
                 'pelanggan_id'   => $request->pelanggan_id,
@@ -168,6 +168,7 @@ class TransaksiApiController extends Controller
                 'updated_at'     => now(),
             ]);
 
+            // Kunci kombinasi unit menjadi tidak tersedia agar hilang dari dropdown menu sewa baru
             DB::table('units')->where('id', $request->unit_id)->update([
                 'status' => 'Tidak Tersedia',
                 'updated_at' => now()
