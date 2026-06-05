@@ -24,7 +24,6 @@ class KonsolApiController extends Controller
         $validator = Validator::make($request->all(), [
             'id' => 'required|string|unique:konsols,id',
             'nama_unit' => 'required|string|max:255',
-            // PERBAIKAN: Ubah filter validasi 'in' hanya untuk PS3, PS4, PS5
             'tipe' => 'required|in:PS3,PS4,PS5',
         ]);
 

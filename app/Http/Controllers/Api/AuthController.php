@@ -12,7 +12,6 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        // 1. Validasi input dari Flutter
         $validator = Validator::make($request->all(), [
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|max:255',
@@ -28,7 +27,6 @@ class AuthController extends Controller
         }
 
         try {
-            // 2. Cek apakah email atau username sudah dipakai
             $cekUser = DB::table('users')
                 ->where('email', $request->email)
                 ->orWhere('username', $request->username)
@@ -41,12 +39,11 @@ class AuthController extends Controller
                 ], 400);
             }
 
-            // 3. Masukkan data ke tabel users
             DB::table('users')->insert([
                 'name'       => $request->name,
                 'email'      => $request->email,
                 'username'   => $request->username,
-                'password'   => Hash::make($request->password), // Enkripsi password
+                'password'   => Hash::make($request->password),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -65,7 +62,6 @@ class AuthController extends Controller
         }
     }
 
-    // ==================== FITUR LOGIN (DITAMBAHKAN) ====================
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -81,13 +77,11 @@ class AuthController extends Controller
         }
 
         try {
-            // Mencari user berdasarkan username ATAU email
             $user = DB::table('users')
                 ->where('username', $request->login_input)
                 ->orWhere('email', $request->login_input)
                 ->first();
 
-            // Verifikasi kecocokan akun dan password ber-hash
             if (!$user || !Hash::check($request->password, $user->password)) {
                 return response()->json([
                     'success' => false,

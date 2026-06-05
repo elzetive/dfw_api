@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Validator;
 
 class TransaksiApiController extends Controller
 {
-    // MENAMPILKAN SEMUA DATA (Untuk Riwayat Hari Ini)
     public function index()
     {
         try {
@@ -43,7 +42,6 @@ class TransaksiApiController extends Controller
         }
     }
 
-    // MENAMPILKAN HANYA YANG BERSTATUS AKTIF
     public function getTransaksiAktif()
     {
         try {
@@ -78,7 +76,6 @@ class TransaksiApiController extends Controller
         }
     }
 
-    // UPDATE STATUS TRANSAKSI & KEMBALIKAN STATUS UNIT PLAY
     public function selesaikanTransaksi(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -125,7 +122,6 @@ class TransaksiApiController extends Controller
         }
     }
 
-    // MEMBUAT TRANSAKSI BARU
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -156,7 +152,6 @@ class TransaksiApiController extends Controller
                 ], 400);
             }
 
-            // Tambah riwayat transaksi sewa aktif
             DB::table('transaksis')->insert([
                 'unit_id'        => $request->unit_id,
                 'pelanggan_id'   => $request->pelanggan_id,
@@ -168,7 +163,6 @@ class TransaksiApiController extends Controller
                 'updated_at'     => now(),
             ]);
 
-            // Kunci kombinasi unit menjadi tidak tersedia agar hilang dari dropdown menu sewa baru
             DB::table('units')->where('id', $request->unit_id)->update([
                 'status' => 'Tidak Tersedia',
                 'updated_at' => now()

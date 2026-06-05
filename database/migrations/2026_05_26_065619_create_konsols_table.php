@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('konsols', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->string('nama_unit');
-            // PERBAIKAN: Mengubah enum default agar hanya menerima PS3, PS4, PS5
             $table->enum('tipe', ['PS3', 'PS4', 'PS5']);
             $table->enum('kondisi', ['Baik', 'Rusak', 'Dalam Perbaikan'])->default('Baik');
             $table->enum('status', ['Tersedia', 'Tidak Tersedia', 'Maintenance'])->default('Tersedia');

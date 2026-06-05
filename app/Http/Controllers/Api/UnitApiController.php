@@ -21,6 +21,7 @@ class UnitApiController extends Controller
                     'units.konsol_id',
                     'units.tv_id',
                     'konsols.nama_unit as nama_konsol',
+                    'konsols.tipe as tipe',
                     'tvs.nama_tv as nama_tv',
                     'units.status'
                 )

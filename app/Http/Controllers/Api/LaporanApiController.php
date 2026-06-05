@@ -11,10 +11,9 @@ class LaporanApiController extends Controller
     public function index()
     {
         try {
-            // PERBAIKAN: Hanya mengambil tanggal dari transaksi yang statusnya sudah 'Selesai'
             $laporan = DB::table('transaksis')
                 ->select(DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as tanggal"))
-                ->where('status', 'Selesai') // <--- FILTER STATUS SELESAI
+                ->where('status', 'Selesai')
                 ->distinct()
                 ->orderBy('tanggal', 'desc')
                 ->get();
@@ -36,7 +35,6 @@ class LaporanApiController extends Controller
     public function detail(string $tanggal)
     {
         try {
-            // PERBAIKAN: Hanya menarik rincian transaksi yang sudah 'Selesai' pada tanggal tersebut
             $transaksi = DB::table('transaksis')
                 ->leftJoin('pelanggans', 'transaksis.pelanggan_id', '=', 'pelanggans.id')
                 ->leftJoin('units', 'transaksis.unit_id', '=', 'units.id')
@@ -46,11 +44,10 @@ class LaporanApiController extends Controller
                     'units.nama_unit'
                 )
                 ->whereDate('transaksis.created_at', $tanggal)
-                ->where('transaksis.status', 'Selesai') // <--- FILTER STATUS SELESAI
+                ->where('transaksis.status', 'Selesai')
                 ->orderBy('transaksis.id', 'desc')
                 ->get();
 
-            // Akumulasi summary otomatis hanya menghitung yang sudah selesai
             $total_pendapatan = (int) $transaksi->sum('total_harga');
             $total_transaksi = $transaksi->count();
 
